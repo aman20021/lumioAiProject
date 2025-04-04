@@ -21,7 +21,7 @@ export default function EmailForm({ prompt, result }: { prompt: string, result: 
       if (!response.ok) throw new Error('Failed to send email');
       setStatus('Email sent successfully!');
     } catch (error) {
-      setStatus('Error sending email');
+      setStatus(`Error sending email,  ${error}`);
     } finally {
       setLoading(false);
     }

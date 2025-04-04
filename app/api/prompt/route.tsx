@@ -5,17 +5,22 @@ const GEMINI_API_KEY='AIzaSyBBXoyDKqLZu80BwMbGBLvVkMKgFtO2nPQ'
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+interface SearchItem {
+    title: string;
+    link: string;
+    snippet: string;
+    htmlTitle: string;
+    htmlSnippet: string;
+  }
+  
+interface GoogleSearchResponse {
+    items?: SearchItem[];
+  }
+  
 
 
-const cleanText = (html: string) => {
-    return html
-      .replace(/<[^>]+>/g, ' ') // Remove HTML tags
-      .replace(/&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;/g, ' ') // Replace common HTML entities
-      .replace(/\s+/g, ' ') // Collapse multiple spaces
-      .trim();
-};
 
-const formatSearchResults = (items: any[]) => {
+const formatSearchResults = (items: SearchItem[]) => {
     const output =  items.map((item, index) => {
       const title = item.title;
       const snippet = item.htmlSnippet;
@@ -33,7 +38,7 @@ const formatSearchResults = (items: any[]) => {
   
 
 export async function POST(req: NextRequest) {
-    
+  try{
   const body = await req.json();
   const prompt = body.prompt;
   if (!prompt) {
@@ -46,25 +51,13 @@ export async function POST(req: NextRequest) {
     const searchResponse = await fetch(
       `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleSearchEngineId}&q=${encodeURIComponent(prompt)}`
     );
-    const searchData = await searchResponse.json();
+    const searchData: GoogleSearchResponse = await searchResponse.json();
 
     const searchContext = formatSearchResults(searchData.items || []);
 
 
     // console.log('Google Search Response:', searchContext);
 
-    const messages = [
-        {
-          role: "system",
-          content: `You are a knowledgeable assistant. Use the following search results to answer questions. 
-                    Cite sources using [1], [2], etc., and include URLs when relevant. Use links if you want to get more information.
-                    If the search results are not relevant, say "I don't know".`
-        },
-        {
-          role: "user",
-          content: `Question: ${prompt}\n\nSearch Results:\n${searchContext}`
-        }
-    ];
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -83,15 +76,12 @@ export async function POST(req: NextRequest) {
     const response = await result.response;
     const text = response.text();
     console.log('Gemini Response:', text);
-    
-    
-  
+    return NextResponse.json({ result: text }, { status: 200 });
 
-  try {
-    const result = `You said: ${prompt}`;
-    // await new Promise((resolve) => setTimeout(resolve, 1000)); // simulate delay
-    return NextResponse.json({ result:text });
+    
   } catch (error) {
+    console.error('Error in POST request:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
+    
+    }
 }

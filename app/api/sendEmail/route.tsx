@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     // Send email
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
         from: 'onboarding@resend.dev',
       to: email,
       subject: 'Your AI Assistant Result',
