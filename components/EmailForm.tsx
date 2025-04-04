@@ -28,25 +28,27 @@ export default function EmailForm({ prompt, result }: { prompt: string, result: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <div className="flex gap-2">
-        <input
-          type="email"
-          required
-          placeholder="Enter your email"
-          className="p-2 border rounded flex-grow"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400 cursor-pointer"
-        >
-          {loading ? 'Sending...' : 'Send Result'}
-        </button>
-      </div>
-      {status && <p className="mt-2 text-sm text-gray-600">{status}</p>}
-    </form>
+    <div className="flex flex-col items-center justify-center p-4">
+        <form onSubmit={handleSubmit} className="mt-4">
+            <div className="flex gap-2">
+                <input
+                type="email"
+                required
+                placeholder="Enter your email"
+                className="p-2 border rounded flex-grow"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                />
+                <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400 cursor-pointer"
+                >
+                {loading ? 'Sending...' : 'Send Result'}
+                </button>
+            </div>
+            {status && <p className="mt-2 text-sm text-gray-600">{status}</p>}
+        </form>
+    </div>
   );
 }
